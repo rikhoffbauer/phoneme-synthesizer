@@ -28,7 +28,7 @@ final class SynthesisTests: XCTestCase {
     }
 
     func testCatalogExposesQualityCandidates() {
-        XCTAssertEqual(Set(BackendCatalog.descriptors.map(\.id)), Set(["kokoro-ane", "luxtts", "styletts2", "inflect-v2"]))
+        XCTAssertEqual(Set(BackendCatalog.descriptors.map(\.id)), Set(["kokoro-ane", "luxtts", "styletts2", "inflect-v2", "toucan-articulatory"]))
         XCTAssertFalse(BackendCatalog.descriptor(id: "kokoro-ane")!.requiresReferenceAudio)
         XCTAssertTrue(BackendCatalog.descriptor(id: "luxtts")!.requiresReferenceAudio)
     }

@@ -156,6 +156,8 @@ public enum BackendFactory {
         case "luxtts": return LuxTtsBackend()
         case "styletts2": return StyleTTS2Backend()
         case "inflect-v2": return InflectBackend()
+        case "toucan-articulatory":
+            return ToucanArticulatoryBackend(configuration: try .installedDefault())
         default: throw BackendError.unknownBackend(id)
         }
     }

@@ -4,7 +4,7 @@ aggregate:
   cer: 0
   clipping_ratio: 0
   dc_offset: -0.000004004309274352058
-  rtfx: 1.394280488165768
+  rtfx: 9.377269886243697
   score: 100
   utmos: null
   wer: 0
@@ -21,6 +21,9 @@ backends:
   - available: false
     backend: inflect-v2
     note: not measured in this run
+  - available: false
+    backend: toucan-articulatory
+    note: not measured in this run
 benchmark_version: 1
 corpus:
   path: Benchmarks/corpus/commit.jsonl
@@ -29,11 +32,11 @@ corpus:
 gates:
   failures: []
   passed: true
-generated_at: 2026-09-06T15:35:05Z
+generated_at: 2026-09-06T21:34:29Z
 git:
   branch: main
   commit: null
-  tree: b44c1f2704e0a182cdbfc256ffb83ddb772dcc32
+  tree: aa56481119481d75dd25d0c5c115754f96bdcb19
 profile: commit
 samples:
   - audio_file: 01-en-01.wav
@@ -45,8 +48,8 @@ samples:
     ipa: həlˈoʊ wˈɜːld
     peak: 0.27349239587783813
     rms: 0.04602869677518026
-    rtfx: 1.0644601009239187
-    synth_ms: 1526.5955
+    rtfx: 1.0669026183413917
+    synth_ms: 1523.100583
     text: Hello world.
     wer: 0
   - audio_file: 02-en-02.wav
@@ -58,8 +61,8 @@ samples:
     ipa: ðə kwˈɪk bɹˈaʊn fˈɑːks dʒˈʌmps ˌoʊvɚ ðə lˈeɪzi dˈɑːɡ
     peak: 0.36285555362701416
     rms: 0.04789027983900187
-    rtfx: 1.2452760876142295
-    synth_ms: 2650.01475
+    rtfx: 23.981860992413008
+    synth_ms: 137.604
     text: The quick brown fox jumps over the lazy dog.
     wer: 0
   - audio_file: 03-en-03.wav
@@ -71,8 +74,8 @@ samples:
     ipa: fɹˈɛʃ bɹˈɛd smˈɛlz wˈʌndɚfəl ɪnðə mˈɔːɹnɪŋ
     peak: 0.4621676206588745
     rms: 0.04591404787903087
-    rtfx: 1.1766000348768209
-    synth_ms: 2337.242834
+    rtfx: 18.299108875984757
+    synth_ms: 150.280542
     text: Fresh bread smells wonderful in the morning.
     wer: 0
   - audio_file: 04-en-04.wav
@@ -84,8 +87,8 @@ samples:
     ipa: ʃiː sˈɛlz sˈiːʃɛlz baɪ ðə sˈiːʃɔːɹ
     peak: 0.3734591007232666
     rms: 0.044961471886915495
-    rtfx: 1.4751514827395427
-    synth_ms: 1677.7937920000002
+    rtfx: 15.539137436607383
+    synth_ms: 159.27525
     text: She sells seashells by the seashore.
     wer: 0
   - audio_file: 05-en-05.wav
@@ -97,8 +100,8 @@ samples:
     ipa: θɹˈiː θˈɪn θˈiːvz θˈɔːt ɐ θˈaʊzənd θˈɔːts
     peak: 0.35276833176612854
     rms: 0.047188400282198784
-    rtfx: 1.31083764932923
-    synth_ms: 2078.823416
+    rtfx: 17.511198234552484
+    synth_ms: 155.61470799999998
     text: Three thin thieves thought a thousand thoughts.
     wer: 0
   - audio_file: 06-en-06.wav
@@ -110,8 +113,8 @@ samples:
     ipa: dʒˈɔːɹdʒ tʃˈoʊz ɐ dʒˈaɪənt dʒˈɑːɹ ʌv ˈɔɹɪndʒ dʒˈæm
     peak: 0.3329154849052429
     rms: 0.0453988796423441
-    rtfx: 1.5853672189559598
-    synth_ms: 2002.690583
+    rtfx: 18.860746516544864
+    synth_ms: 168.339042
     text: George chose a giant jar of orange jam.
     wer: 0
   - audio_file: 07-en-07.wav
@@ -123,8 +126,8 @@ samples:
     ipa: wiː ɹˈɛɹli ɹˈiəli wˈʌɹi ɐbˌaʊt ɹˈʊɹɹəl ɹˈoʊdz
     peak: 0.39686158299446106
     rms: 0.04333937475368937
-    rtfx: 1.5472060436305832
-    synth_ms: 1906.662666
+    rtfx: 18.95876228202444
+    synth_ms: 155.600875
     text: We rarely really worry about rural roads.
     wer: 0
   - audio_file: 08-en-08.wav
@@ -136,8 +139,8 @@ samples:
     ipa: plˈiːz bɹˈɪŋ bɹˈaɪt blˈuː flˈaʊɚz bᵻfˌɔːɹ bɹˈɛkfəst
     peak: 0.32087409496307373
     rms: 0.04796948261701165
-    rtfx: 1.6764226999295084
-    synth_ms: 1879.001042
+    rtfx: 19.003101288032017
+    synth_ms: 165.762417
     text: Please bring bright blue flowers before breakfast.
     wer: 0
   - audio_file: 09-en-09.wav
@@ -149,8 +152,8 @@ samples:
     ipa: ɐ nˈɔɪzi tɹˈeɪn kɹˈɔst ðə bɹˈɪdʒ æt mˈɪdnaɪt
     peak: 0.3996948301792145
     rms: 0.04924054192985914
-    rtfx: 1.5060930151460823
-    synth_ms: 1942.1111250000001
+    rtfx: 18.492663445145645
+    synth_ms: 158.170834
     text: A noisy train crossed the bridge at midnight.
     wer: 0
   - audio_file: 10-en-10.wav
@@ -162,8 +165,8 @@ samples:
     ipa: kʊd juː mˈɛʒɚ ðə tˈɛmpɹɪtʃɚ pɹɪsˈaɪsli
     peak: 0.36606651544570923
     rms: 0.048824577900769627
-    rtfx: 1.5404431468066182
-    synth_ms: 1736.513292
+    rtfx: 16.972591979567714
+    synth_ms: 157.607041
     text: Could you measure the temperature precisely?
     wer: 0
   - audio_file: 11-en-11.wav
@@ -175,8 +178,8 @@ samples:
     ipa: ðə dʒˈʌdʒ kˈɑːmli ˈæskt wˈɛðɚɹ ˈɛvɹɪwˌʌn ɐɡɹˈiːd
     peak: 0.4881881773471832
     rms: 0.04702601932260523
-    rtfx: 1.3379586365644238
-    synth_ms: 2410.388417
+    rtfx: 18.013409584254358
+    synth_ms: 179.03329100000002
     text: The judge calmly asked whether everyone agreed.
     wer: 0
   - audio_file: 12-en-12.wav
@@ -188,8 +191,8 @@ samples:
     ipa: vˈɔɪs kwˈɔlᵻɾi mˈæɾɚz wɛn sˈʌɾəl sˈaʊndz dˈɪfɚ
     peak: 0.34968435764312744
     rms: 0.04765346243544293
-    rtfx: 1.3567654541709488
-    synth_ms: 2524.3862080000004
+    rtfx: 6.137370933284391
+    synth_ms: 558.056542
     text: Voice quality matters when subtle sounds differ.
     wer: 0
 schema_version: 1
@@ -208,10 +211,10 @@ system:
 | WER | 0.00% |
 | CER | 0.00% |
 | UTMOS | not measured |
-| RTFx | 1.39× |
+| RTFx | 9.38× |
 | Clipping ratio | 0.00% |
 | DC offset | -4.004e-6 |
 
 All benchmark gates passed.
 
-Profile: `commit` · corpus: `Benchmarks/corpus/commit.jsonl` (12 samples) · tree: `b44c1f2704e0a182cdbfc256ffb83ddb772dcc32`
+Profile: `commit` · corpus: `Benchmarks/corpus/commit.jsonl` (12 samples) · tree: `aa56481119481d75dd25d0c5c115754f96bdcb19`

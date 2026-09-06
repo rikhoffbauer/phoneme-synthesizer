@@ -19,6 +19,9 @@ type Report = {
   samples: Sample[];
 };
 type History = { commit: string; date: string; subject: string; backend: string; score: number; wer: number | null; cer: number | null; utmos: number | null; rtfx: number; passed: boolean; hardware: string }[];
+type FullBackend = { backend: string; score: number; wer: number | null; cer: number | null; utmos: number | null; rtfx: number; clipping_ratio: number; gates_passed: boolean; gate_failures: string[]; source_tree: string; measured_at: string };
+type FullComparison = { generated_at: string; utmos_revision: string; backends: FullBackend[] };
+const repoURL = "https://github.com/rikhoffbauer/phoneme-synthesizer";
 
 const pct = (v: number | null, digits = 2) => v == null ? "—" : `${(v * 100).toFixed(digits)}%`;
 const num = (v: number | null, digits = 2) => v == null ? "—" : v.toFixed(digits);
@@ -46,6 +49,13 @@ function TrendChart({ history }: { history: History }) {
   </svg></div>;
 }
 
+function BackendComparison({ full }: { full: FullComparison }) {
+  return <section><div className="section-head"><div><h2>Full backend comparison</h2><p>Same corpus, Parakeet fidelity scoring, and pinned UTMOSv2 naturalness evaluation.</p></div><code>{full.backends.length} backends</code></div>
+    <div className="table-scroll"><table><thead><tr><th>Backend</th><th>Score</th><th>WER</th><th>CER</th><th>UTMOS</th><th>RTFx</th><th>Gates</th><th>Tree</th></tr></thead><tbody>
+      {full.backends.map(b => <tr key={b.backend}><td><strong>{b.backend}</strong></td><td>{b.score.toFixed(2)}</td><td>{pct(b.wer)}</td><td>{pct(b.cer)}</td><td>{num(b.utmos, 3)}</td><td>{b.rtfx.toFixed(2)}×</td><td>{b.gates_passed ? "pass" : "fail"}</td><td><code>{short(b.source_tree)}</code></td></tr>)}
+    </tbody></table></div></section>;
+}
+
 function Samples({ report }: { report: Report }) {
   return <div className="table-scroll"><table><thead><tr><th>Sample</th><th>IPA</th><th>Audio</th><th>WER</th><th>CER</th><th>RTFx</th><th>Peak</th></tr></thead><tbody>
     {report.samples.map(s => <tr key={s.id}><td><strong>{s.id}</strong><span>{s.text}</span></td><td className="ipa">{s.ipa}</td><td>{s.audio_file ? <audio controls preload="none" src={`./audio/${s.audio_file}`}/> : "—"}</td><td>{pct(s.wer)}</td><td>{pct(s.cer)}</td><td>{s.rtfx.toFixed(2)}×</td><td>{s.peak.toFixed(3)}</td></tr>)}
@@ -55,13 +65,15 @@ function Samples({ report }: { report: Report }) {
 function App() {
   const [report, setReport] = useState<Report | null>(null);
   const [history, setHistory] = useState<History>([]);
+  const [full, setFull] = useState<FullComparison | null>(null);
   const [docs, setDocs] = useState("");
   const [tab, setTab] = useState<"results"|"history"|"docs">("results");
   useEffect(() => { Promise.all([
     fetch("./data/current.json").then(r => r.json()),
     fetch("./data/history.json").then(r => r.json()),
+    fetch("./data/full.json").then(r => r.json()),
     fetch("./README.md").then(r => r.text()),
-  ]).then(([r, h, d]) => { setReport(r); setHistory(h); setDocs(d); }); }, []);
+  ]).then(([r, h, f, d]) => { setReport(r); setHistory(h); setFull(f); setDocs(d); }); }, []);
   const docsHtml = useMemo(() => ({ __html: marked.parse(docs) as string }), [docs]);
   if (!report) return <main className="loading">Loading benchmark data…</main>;
   return <>
@@ -71,9 +83,10 @@ function App() {
         <section className="hero"><div><h1>Direct IPA in. Measured speech out.</h1><p>Every commit carries its own machine-readable benchmark result. Quality gates prioritize pronunciation fidelity before synthesis speed.</p></div><div className={`gate ${report.gates.passed ? "pass" : "fail"}`}>{report.gates.passed ? "Gates passed" : "Regression detected"}</div></section>
         <section className="metrics"><Metric label="Composite score" value={report.aggregate.score.toFixed(2)} detail="0–100"/><Metric label="WER" value={pct(report.aggregate.wer)} detail="ASR round-trip"/><Metric label="CER" value={pct(report.aggregate.cer)} detail="ASR round-trip"/><Metric label="RTFx" value={`${report.aggregate.rtfx.toFixed(2)}×`} detail="audio / synthesis time"/><Metric label="UTMOS" value={num(report.aggregate.utmos,3)} detail="full profile"/></section>
         {!report.gates.passed && <section className="failures"><strong>Failed gates</strong><ul>{report.gates.failures.map(x => <li key={x}>{x}</li>)}</ul></section>}
+        {full && <BackendComparison full={full}/>}
         <section><div className="section-head"><div><h2>Current corpus</h2><p>{report.corpus.samples} fixed samples · {report.aggregate.backend} · {report.system.hardware}</p></div><code>{short(report.git.tree)}</code></div><Samples report={report}/></section>
       </>}
-      {tab === "history" && <><section className="section-head"><div><h1>Benchmark history</h1><p>Reconstructed from immutable <code>BENCHMARK_RESULTS.md</code> files across git history.</p></div></section><TrendChart history={history}/><div className="history-list">{[...history].reverse().map(h => <article key={h.commit}><div><code>{short(h.commit)}</code><strong>{h.score.toFixed(2)}</strong><span>{h.subject}</span></div><div><span>{pct(h.wer)} WER</span><span>{h.rtfx.toFixed(2)}× RTFx</span><span>{new Date(h.date).toISOString().slice(0,10)}</span></div></article>)}</div></>}
+      {tab === "history" && <><section className="section-head"><div><h1>Benchmark history</h1><p>Reconstructed from immutable <code>BENCHMARK_RESULTS.md</code> files across git history.</p></div></section><TrendChart history={history}/><div className="history-list">{[...history].reverse().map(h => <article key={h.commit}><div><a href={`${repoURL}/commit/${h.commit}`}><code>{short(h.commit)}</code></a><strong>{h.score.toFixed(2)}</strong><span>{h.subject}</span></div><div><span>{pct(h.wer)} WER</span><span>{h.rtfx.toFixed(2)}× RTFx</span><span>{new Date(h.date).toISOString().slice(0,10)}</span></div></article>)}</div></>}
       {tab === "docs" && <article className="docs" dangerouslySetInnerHTML={docsHtml}/>} 
     </main>
     <footer><span>Profile {report.profile}</span><span>{new Date(report.generated_at).toISOString()}</span><span>{report.system.arch}</span></footer>

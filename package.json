@@ -12,7 +12,8 @@
     "site:build": "bun scripts/build-site.ts && vite build --config site/vite.config.ts",
     "site:dev": "bun scripts/build-site.ts && vite --config site/vite.config.ts",
     "ci": "bun test && swift test && swift build -c release && bun scripts/validate-benchmark.ts && bun run site:build",
-    "benchmark:validate": "bun scripts/validate-benchmark.ts"
+    "benchmark:validate": "bun scripts/validate-benchmark.ts",
+    "toucan:setup": "scripts/setup-toucan.sh"
   },
   "dependencies": {
     "marked": "^18.0.11",

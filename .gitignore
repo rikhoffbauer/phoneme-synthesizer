@@ -9,3 +9,5 @@ site/public/data/*.json
 site/public/audio/
 site/public/README.md
 site/public/DESIGN.md
+__pycache__/
+site/public/docs/

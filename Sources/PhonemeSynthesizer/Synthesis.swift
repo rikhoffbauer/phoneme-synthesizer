@@ -65,6 +65,7 @@ public enum BackendCatalog {
         .init(id: "luxtts", displayName: "LuxTTS / ZipVoice-Distill", sampleRate: 48_000, requiresReferenceAudio: true, requiresPromptPhonemes: true),
         .init(id: "styletts2", displayName: "StyleTTS2 LibriTTS", sampleRate: 24_000, requiresReferenceAudio: true, requiresPromptPhonemes: false),
         .init(id: "inflect-v2", displayName: "Inflect v2 Micro", sampleRate: 24_000, requiresReferenceAudio: false, requiresPromptPhonemes: false),
+        .init(id: "toucan-articulatory", displayName: "IMS Toucan articulatory (experimental)", sampleRate: 24_000, requiresReferenceAudio: false, requiresPromptPhonemes: false),
     ]
 
     public static func descriptor(id: String) -> BackendDescriptor? {

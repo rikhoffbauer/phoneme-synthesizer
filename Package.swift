@@ -17,7 +17,8 @@ let package = Package(
     targets: [
         .target(
             name: "PhonemeSynthesizer",
-            dependencies: [.product(name: "FluidAudio", package: "FluidAudio")]
+            dependencies: [.product(name: "FluidAudio", package: "FluidAudio")],
+            resources: [.process("Resources")]
         ),
         .executableTarget(
             name: "PhonemeSynthCLI",
