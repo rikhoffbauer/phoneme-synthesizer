@@ -75,6 +75,16 @@ jobs:
             .benchmarks/audio/*.wav
           if-no-files-found: error
 
+      - name: Package source snapshot
+        run: git archive --format=zip --prefix=phoneme-synthesizer-main/ -o phoneme-synthesizer-main.zip HEAD
+
+      - name: Upload source snapshot
+        uses: actions/upload-artifact@v4
+        with:
+          name: source-${{ github.sha }}
+          path: phoneme-synthesizer-main.zip
+          if-no-files-found: error
+
       - name: Build benchmark site
         run: bun run site:build
         env:

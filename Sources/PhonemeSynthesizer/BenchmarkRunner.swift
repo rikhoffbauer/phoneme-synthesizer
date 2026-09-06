@@ -76,7 +76,10 @@ public enum BenchmarkRunner {
         // Warm model loading/compilation outside timed samples.
         _ = try await service.synthesize(ipa: items[0].ipa, options: options.synthesisOptions)
 
-        let asr = try await options.includeASR ? makeASR() : nil
+        // Keep TTS and ASR in separate phases. Loading/interleaving two large
+        // Core ML pipelines can perturb ANE execution; synthesis metrics must
+        // describe a fixed set of TTS outputs before ASR is introduced.
+        var synthesizedSamples: [PendingBenchmarkSample] = []
         var sampleResults: [BenchmarkSampleResult] = []
         var totalSynthMs = 0.0
         var totalAudioMs = 0.0
@@ -103,15 +106,27 @@ public enum BenchmarkRunner {
             let audioURL = options.audioDirectory.appendingPathComponent(fileName)
             try audio.wavData().write(to: audioURL, options: .atomic)
 
+            totalSynthMs += synthMs
+            totalAudioMs += audioMs
+            clipping.append(signal.clippingRatio)
+            dcOffsets.append(signal.dcOffset)
+            synthesizedSamples.append(.init(
+                item: item, audio: audio, audioFile: fileName,
+                synthMs: synthMs, audioMs: audioMs, rtfx: rtfx, signal: signal))
+        }
+
+        // ASR is deliberately loaded only after every TTS waveform is fixed.
+        let asr = try await options.includeASR ? makeASR() : nil
+        for sample in synthesizedSamples {
             var wer: Double? = nil
             var cer: Double? = nil
             if let asr {
                 let converter = AudioConverter(sampleRate: 16_000)
-                let samples16k = try converter.resample(audio.samples, from: Double(audio.sampleRate))
+                let samples16k = try converter.resample(sample.audio.samples, from: Double(sample.audio.sampleRate))
                 var state = try TdtDecoderState(decoderLayers: await asr.decoderLayerCount)
                 let result = try await asr.transcribe(samples16k, decoderState: &state)
-                let wordErrors = TextMetrics.wordErrors(reference: item.text, hypothesis: result.text)
-                let characterErrors = TextMetrics.characterErrors(reference: item.text, hypothesis: result.text)
+                let wordErrors = TextMetrics.wordErrors(reference: sample.item.text, hypothesis: result.text)
+                let characterErrors = TextMetrics.characterErrors(reference: sample.item.text, hypothesis: result.text)
                 wer = wordErrors.rate
                 cer = characterErrors.rate
                 wordEdits += wordErrors.edits
@@ -119,16 +134,11 @@ public enum BenchmarkRunner {
                 characterEdits += characterErrors.edits
                 referenceCharacters += characterErrors.referenceUnits
             }
-
-            totalSynthMs += synthMs
-            totalAudioMs += audioMs
-            clipping.append(signal.clippingRatio)
-            dcOffsets.append(signal.dcOffset)
             sampleResults.append(.init(
-                id: item.id, text: item.text, ipa: item.ipa, audioFile: fileName,
-                synthMs: synthMs, audioMs: audioMs, rtfx: rtfx, wer: wer, cer: cer,
-                peak: signal.peak, rms: signal.rms, clippingRatio: signal.clippingRatio,
-                dcOffset: signal.dcOffset))
+                id: sample.item.id, text: sample.item.text, ipa: sample.item.ipa, audioFile: sample.audioFile,
+                synthMs: sample.synthMs, audioMs: sample.audioMs, rtfx: sample.rtfx, wer: wer, cer: cer,
+                peak: sample.signal.peak, rms: sample.signal.rms, clippingRatio: sample.signal.clippingRatio,
+                dcOffset: sample.signal.dcOffset))
         }
 
         let meanWER = options.includeASR ? ErrorRateMeasurement(edits: wordEdits, referenceUnits: referenceWords).rate : nil
@@ -225,6 +235,16 @@ public enum BenchmarkRunner {
         let path = url.standardizedFileURL.path
         return path.hasPrefix(cwd + "/") ? String(path.dropFirst(cwd.count + 1)) : path
     }
+}
+
+private struct PendingBenchmarkSample {
+    let item: BenchmarkCorpusItem
+    let audio: SynthesizedAudio
+    let audioFile: String
+    let synthMs: Double
+    let audioMs: Double
+    let rtfx: Double
+    let signal: SignalMeasurement
 }
 
 private extension Duration {
