@@ -1,0 +1,14 @@
+#!/bin/sh
+set -eu
+cd "$(git rev-parse --show-toplevel)"
+
+if [ "${SKIP_BENCHMARK:-0}" = "1" ]; then
+  echo "SKIP_BENCHMARK=1: skipping repository benchmark hook" >&2
+  exit 0
+fi
+
+bun test
+swift test
+bun scripts/update-benchmark.ts commit
+bun scripts/validate-benchmark.ts
+git add BENCHMARK_RESULTS.md

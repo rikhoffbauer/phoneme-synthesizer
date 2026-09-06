@@ -1,0 +1,103 @@
+name: CI, benchmarks, and Pages
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages-${{ github.ref }}"
+  cancel-in-progress: true
+
+jobs:
+  verify-benchmark-site:
+    runs-on: macos-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout full history
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.0
+
+      - name: Cache FluidAudio models
+        uses: actions/cache@v5
+        with:
+          path: |
+            ~/Library/Application Support/FluidAudio/Models
+            ~/.cache/fluidaudio
+          key: fluidaudio-models-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('Package.resolved') }}
+
+      - name: Install JavaScript dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Toolchain info
+        run: |
+          uname -a
+          sysctl -n hw.model
+          swift --version
+          bun --version
+
+      - name: TypeScript tests
+        run: bun test
+
+      - name: Swift tests
+        run: swift test
+
+      - name: Release build
+        run: swift build -c release
+
+      - name: Commit benchmark
+        run: bun scripts/update-benchmark.ts commit
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+
+      - name: Validate benchmark report
+        run: bun scripts/validate-benchmark.ts
+
+      - name: Upload benchmark artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-${{ github.sha }}
+          path: |
+            BENCHMARK_RESULTS.md
+            .benchmarks/latest.json
+            .benchmarks/audio/*.wav
+          if-no-files-found: error
+
+      - name: Build benchmark site
+        run: bun run site:build
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+
+      - name: Configure Pages
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: site/dist
+
+  deploy-pages:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: verify-benchmark-site
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

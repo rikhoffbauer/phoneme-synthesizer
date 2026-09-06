@@ -1,0 +1,11 @@
+.DS_Store
+.build/
+.swiftpm/
+node_modules/
+.venv/
+.benchmarks/
+site/dist/
+site/public/data/*.json
+site/public/audio/
+site/public/README.md
+site/public/DESIGN.md
